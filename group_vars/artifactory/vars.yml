@@ -29,10 +29,8 @@ container_pod_containers:
   - name: artifactory
     description: "Artifactory server container"
     image_name: docker.bintray.io/jfrog/artifactory-oss
-    image_tag: 7.33.9
+    image_tag: 6.23.13
     image_pull_policy: IfNotPresent
-    env:
-      EXTRA_JAVA_OPTIONS: "-Xms1g -Xmx2g"
     resources:
       limits:
         memory: "2Gi"
@@ -42,12 +40,11 @@ container_pod_containers:
         cpu: "500m"
     securityContext:
       runAsUser: 0
+      fsGroup: 0
     ports:
       - containerPort: 8081
         hostPort: 8082
         protocol: TCP
-      - containerPort: 8046
-        protocal: TCP
     volumeMounts:
       - mountPath: /var/opt/jfrog/artifactory:rw,z
         name: artifactory-data
