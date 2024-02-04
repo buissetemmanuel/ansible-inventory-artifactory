@@ -47,7 +47,6 @@ container_pod_containers:
       fsGroup: 0
     ports:
       - containerPort: "{{ vault_artifactory_postgres_port }}"
-        hostPort: "{{ vault_artifactory_postgres_port }}"
         protocol: TCP
     volumeMounts:
       - mountPath: /var/lib/postgresql/data:rw,z
@@ -64,7 +63,7 @@ container_pod_containers:
       JF_SHARED_DATABASE_DRIVER: org.postgresql.Driver
       JF_SHARED_DATABASE_USERNAME: "{{ vault_artifactory_postgres_user }}"
       JF_SHARED_DATABASE_PASSWORD: "{{ vault_artifactory_postgres_password }}"
-      JF_SHARED_DATABASE_URL: jdbc:postgresql://127.0.0.1:{{ vault_artifactory_postgres_port }}/{{ vault_artifactory_postgres_db }}
+      JF_SHARED_DATABASE_URL: jdbc:postgresql://localhost:{{ vault_artifactory_postgres_port }}/{{ vault_artifactory_postgres_db }}
       JF_ROUTER_ENTRYPOINTS_EXTERNALPORT: "{{ artifactory_port }}"
     resources:
       limits:
