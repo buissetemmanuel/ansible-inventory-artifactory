@@ -1,0 +1,7 @@
+laptop01 ansible_host=laptop01.local.ch
+
+[all:vars]
+ansible_user=admin
+
+[artifactory]
+laptop01
