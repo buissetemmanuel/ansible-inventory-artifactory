@@ -1,7 +1,7 @@
-server02 ansible_host=server02.local.ch
+laptop01 ansible_host=laptop01.local.ch
 
 [all:vars]
 ansible_user=admin
 
 [artifactory]
-server02
+laptop01

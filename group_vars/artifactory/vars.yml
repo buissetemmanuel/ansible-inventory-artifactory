@@ -25,25 +25,34 @@ container_user_group_service: artifactoryugs
 
 container_pod_name: artifactory_pod
 
+artifactory_port: 8080
+
 container_pod_containers:
   - name: artifactory
     description: "Artifactory server container"
     image_name: docker.bintray.io/jfrog/artifactory-oss
-    image_tag: 6.23.13
+    image_tag: 7.77.3
     image_pull_policy: IfNotPresent
+    env:
+      JF_SHARED_JFROGURL: "http://{{ ansible_fqdn }}"
+      JF_SHARED_NODE_ID: node1
+      JF_ROUTER_ENTRYPOINTS_EXTERNALPORT: "{{ artifactory_port }}"
     resources:
       limits:
-        memory: "2Gi"
-        cpu: "1"
+        memory: "5Gi"
+        cpu: "2"
       requests:
-        memory: "1Gi"
-        cpu: "500m"
+        memory: "4Gi"
+        cpu: "1"
     securityContext:
       runAsUser: 0
       fsGroup: 0
     ports:
       - containerPort: 8081
-        hostPort: 8082
+        hostPort: 8081
+        protocol: TCP
+      - containerPort: 8080
+        hostPort: "{{ artifactory_port }}"
         protocol: TCP
     volumeMounts:
       - mountPath: /var/opt/jfrog/artifactory:rw,z
