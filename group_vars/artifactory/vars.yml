@@ -28,6 +28,30 @@ container_pod_name: artifactory_pod
 artifactory_port: 8080
 
 container_pod_containers:
+  - name: postgresql
+    description: "Postgresql server container"
+    image_name: "docker.bintray.io/postgres"
+    image_tag: 15.5-alpine
+    image_pull_policy: IfNotPresent
+    env:
+      POSTGRES_DB: "{{ vault_artifactory_postgres_db }}"
+      POSTGRES_USER: "{{ vault_artifactory_postgres_user }}"
+      POSTGRES_PASSWORD: "{{ vault_artifactory_postgres_password }}"
+      PGPORT: "{{ vault_artifactory_postgres_port }}"
+    resources:
+      limits:
+        memory: "2Gi"
+        cpu: "1"
+    securityContext:
+      runAsUser: 0
+      fsGroup: 0
+    ports:
+      - containerPort: "{{ vault_artifactory_postgres_port }}"
+        hostPort: "{{ vault_artifactory_postgres_port }}"
+        protocol: TCP
+    volumeMounts:
+      - mountPath: /var/lib/postgresql/data:rw,z
+        name: postgres-data
   - name: artifactory
     description: "Artifactory server container"
     image_name: docker.bintray.io/jfrog/artifactory-oss
@@ -36,6 +60,11 @@ container_pod_containers:
     env:
       JF_SHARED_JFROGURL: "http://{{ ansible_fqdn }}"
       JF_SHARED_NODE_ID: node1
+      JF_SHARED_DATABASE_TYPE: postgresql
+      JF_SHARED_DATABASE_DRIVER: org.postgresql.Driver
+      JF_SHARED_DATABASE_USERNAME: "{{ vault_artifactory_postgres_user }}"
+      JF_SHARED_DATABASE_PASSWORD: "{{ vault_artifactory_postgres_password }}"
+      JF_SHARED_DATABASE_URL: jdbc:postgresql://127.0.0.1:{{ vault_artifactory_postgres_port }}/{{ vault_artifactory_postgres_db }}
       JF_ROUTER_ENTRYPOINTS_EXTERNALPORT: "{{ artifactory_port }}"
     resources:
       limits:
@@ -58,15 +87,24 @@ container_pod_containers:
       - mountPath: /var/opt/jfrog/artifactory:rw,z
         name: artifactory-data
 
+postgres_pod_data_dir: "{{ container_pod_home_dir }}/postgres-data"
 artifactory_pod_data_dir: "{{ container_pod_home_dir }}/artifactory-data"
 
 container_directories:
+  - path: "{{ postgres_pod_data_dir }}"
+    owner: "{{ container_user_owner_service }}"
+    group: "{{ container_user_group_service }}"
+    mode: "{{ container_directories_mode }}"
   - path: "{{ artifactory_pod_data_dir }}"
     owner: "{{ container_user_owner_service }}"
     group: "{{ container_user_group_service }}"
     mode: "{{ container_directories_mode }}"
 
 container_pod_volumes:
+  - name: postgres-data
+    hostPath:
+      path: "{{ postgres_pod_data_dir }}"
+      type: DirectoryOrCreate
   - name: artifactory-data
     hostPath:
       path: "{{ artifactory_pod_data_dir }}"
